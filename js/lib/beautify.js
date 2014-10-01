@@ -270,6 +270,7 @@
         opt.wrap_line_length = (options.wrap_line_length === undefined) ? 0 : parseInt(options.wrap_line_length, 10);
         opt.e4x = (options.e4x === undefined) ? false : options.e4x;
         opt.end_with_newline = (options.end_with_newline === undefined) ? false : options.end_with_newline;
+        opt.comma_first = (options.comma_first === undefined) ? false : options.comma_first;
 
 
         // force opt.space_after_anon_function to true if opt.jslint_happy
@@ -441,6 +442,16 @@
         }
 
         function print_token(printable_token) {
+            if (opt.comma_first && last_type === 'TK_COMMA'
+                && output.just_added_newline()) {
+                if(output.previous_line.last() === ',') {
+                    output.previous_line.pop();
+                    print_token_line_indentation();
+                    output.add_token(',');
+                    output.space_before_token = true;
+                }
+            }
+
             printable_token = printable_token || current_token.text;
             print_token_line_indentation();
             output.add_token(printable_token);
@@ -1021,6 +1032,11 @@
                     print_newline(false, true);
                 } else {
                     output.space_before_token = true;
+                    // for comma-first, we want to allow a newline before the comma
+                    // to turn into a newline after the comma, which we will fixup later
+                    if (opt.comma_first) {
+                        allow_wrap_or_preserved_newline();
+                    }
                 }
                 return;
             }
@@ -1035,6 +1051,11 @@
             } else {
                 // EXPR or DO_BLOCK
                 output.space_before_token = true;
+                // for comma-first, we want to allow a newline before the comma
+                // to turn into a newline after the comma, which we will fixup later
+                if (opt.comma_first) {
+                    allow_wrap_or_preserved_newline();
+                }
             }
 
         }
@@ -1249,9 +1270,19 @@
         }
 
         this.push = function(input) {
-            _items.push(input);
-            _character_count += input.length;
-            _empty = false;
+          _items.push(input);
+          _character_count += input.length;
+          _empty = false;
+        }
+
+        this.pop = function() {
+          var item = null;
+          if (!_empty) {
+            item = _items.pop();
+            _character_count -= item.length;
+            _empty = _items.length === 0;
+          }
+          return item;
         }
 
         this.remove_indent = function() {
@@ -1290,6 +1321,7 @@
         var lines =[];
         this.baseIndentString = baseIndentString;
         this.indent_string = indent_string;
+        this.previous_line = null;
         this.current_line = null;
         this.space_before_token = false;
 
@@ -1304,6 +1336,7 @@
             }
 
             if (force_newline || !this.just_added_newline()) {
+                this.previous_line = this.current_line;
                 this.current_line = new OutputLine(this);
                 lines.push(this.current_line);
                 return true;
@@ -1380,6 +1413,8 @@
                 this.current_line = lines[lines.length - 1]
                 this.current_line.trim();
             }
+
+            this.previous_line = lines.length > 1 ? lines[lines.length - 2] : null;
         }
 
         this.just_added_newline = function() {

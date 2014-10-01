@@ -62,6 +62,7 @@ var fs = require('fs'),
         "wrap_line_length": Number,
         "e4x": Boolean,
         "end_with_newline": Boolean,
+        "comma_first": Boolean,
         // CSS-only
         "selector_separator_newline": Boolean,
         "newline_between_rules": Boolean,

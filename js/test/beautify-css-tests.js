@@ -14,7 +14,7 @@ function run_css_tests(test_obj, Urlencoded, js_beautify, html_beautify, css_bea
         break_chained_methods: false,
         selector_separator: '\n',
         end_with_newline: false,
-        newline_between_rules: true,
+        newline_between_rules: true
     };
 
     function test_css_beautifier(input)
@@ -109,7 +109,7 @@ function run_css_tests(test_obj, Urlencoded, js_beautify, html_beautify, css_bea
         t('@font-face {\n\tfont-family: "Bitstream Vera Serif Bold";\n\tsrc: url("http://developer.mozilla.org/@api/deki/files/2934/=VeraSeBd.ttf");\n}\n@media screen {\n\t#foo:hover {\n\t\tbackground-image: url(foo.png);\n\t}\n\t@media screen and (min-device-pixel-ratio: 2) {\n\t\t@font-face {\n\t\t\tfont-family: "Helvetica Neue"\n\t\t}\n\t\t#foo:hover {\n\t\t\tbackground-image: url(foo@2x.png);\n\t\t}\n\t}\n}');
         t('a:first-child{color:red;div:first-child{color:black;}}\n.div{height:15px;}', 'a:first-child {\n\tcolor: red;\n\tdiv:first-child {\n\t\tcolor: black;\n\t}\n}\n.div {\n\theight: 15px;\n}');
 
-        // 
+        //
 
         // test basic css beautifier
         t(".tabs {}");
